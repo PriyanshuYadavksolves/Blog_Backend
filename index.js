@@ -17,7 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://ec2-13-233-158-86.ap-south-1.compute.amazonaws.com:41383/",
+    origin: "*",
     optionsSuccessStatus: 200
   })
   );
