@@ -26,6 +26,10 @@ app.use(
     limits: { fileSize: 10 * 1024 * 1024 } // 10 MB limit
   }));
 
+  app.get('/hello',(req,res)=>{
+    res.json("hello")
+  })
+
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
