@@ -22,7 +22,7 @@ module.exports = ({ coverImg, blogTitle, userPic, userName, blogId }) => {
             <img class="" style="display: block; width: 100%; border-radius: 10px; margin: 0px auto;
     object-fit: contain;" src="${coverImg}" alt="${coverImg}">
     
-            <h2><a href="http://localhost:3000/blog/${blogId}" style=" text-decoration: none; color: blue;">
+            <h2><a href="http://ec2-13-126-44-183.ap-south-1.compute.amazonaws.com:3000/blog/${blogId}" style=" text-decoration: none; color: blue;">
                    ${blogTitle}
                 </a> </h2>
     

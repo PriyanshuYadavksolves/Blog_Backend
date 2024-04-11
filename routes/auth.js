@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 
 //Register
-router.post("/register",checkUserExists, async (req, res) => {
+router.post("/register", async (req, res) => {
   
   const {username,password,email,profilePic} = req.body
   console.log(req.body)
@@ -33,15 +33,15 @@ router.post("/register",checkUserExists, async (req, res) => {
     const verificationToken = crypto.randomBytes(40).toString('hex');
     console.log("hello")
 
-    // const user = await User.create({
-    //   username,
-    //   email,
-    //   password: hashedPass,
-    //   profilePic: profilePic,
-    //   verificationToken,
-    // });
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPass,
+      profilePic: profilePic,
+      verificationToken,
+    });
 
-    const url = `http://localhost:3000/verify/${verificationToken}`;
+    const url = `http://ec2-13-126-44-183.ap-south-1.compute.amazonaws.com:3000/verify/${verificationToken}+${email}`;
     const verificationEmailContent = verificationEmail({ username ,url });
 
     console.log("hello")
@@ -72,14 +72,17 @@ router.post("/register",checkUserExists, async (req, res) => {
 
 router.post('/verify',async(req,res)=>{
   try {
-    const { verificationToken, email } = req.body;
+    const { token,email } = req.body;
     const user = await User.findOne({ email });
 
     if(!user){
       return res.status(404).json({message:"User Not Found"})
     }
-
-    if(user.verificationToken !== verificationToken){
+    if(user.verified){
+      return res.status(200).json({message:"user already verified"})
+    }
+    
+    if(user.verificationToken !== token){
       return res.status(404).json({message:"Token is Not Correct"})
     }
 
