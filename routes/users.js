@@ -4,13 +4,36 @@ const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const varifyToken = require("../middleware/varifyToken");
 const sendFollowNotificationEmail = require("../emailServices/sendFollowNotificationEmail"); // Import the exported function
+const listEmailIdentities = require('../emailServices/getAwsSesEmailList')
 const Blog = require("../models/Blog");
+const verifyToken = require("../middleware/varifyToken");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
+
+
+router.get('/followers/:userId',verifyToken,async(req,res)=>{
+  const {userId} = req.params
+  try {
+    const followers = await User.find({ following: userId }, { _id: 1, username: 1,profilePic:1,isAdmin:1 }); // Exclude password and __v
+    res.status(200).json(followers );
+  } catch (error) {
+    res.status(500).json(error);
+  }
+})
+
+router.get('/followings/:userId',verifyToken,async(req,res)=>{
+  const {userId} = req.params
+  try {
+    const followings = await User.find({ followers: userId }, { _id: 1, username: 1,profilePic:1,isAdmin:1 }); // Exclude password and __v
+    res.status(200).json(followings );
+  } catch (error) {
+    res.status(500).json(error);
+  }
+})
 
 router.put("/follow/:userId", varifyToken, async (req, res) => {
   const followerId = req.userId; // Get ID of the logged-in user (follower)
@@ -38,12 +61,17 @@ router.put("/follow/:userId", varifyToken, async (req, res) => {
     }
 
     const { email } = following._doc; // Retrieve the email of the user being followed
-    await sendFollowNotificationEmail(
-      email,
-      follower.username,
-      following.username
-    );
-
+    const emailList = await listEmailIdentities()
+    if(emailList.includes(email)){
+      await sendFollowNotificationEmail(
+        email,
+        follower.username,
+        following.username
+      );
+    }else{
+      console.log("email is not valid")
+    }
+ 
     const { password, createdAt, updatedAt, __v, ...others } = follower._doc;
 
     res.status(200).json(others);
